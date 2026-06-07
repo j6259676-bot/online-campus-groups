@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<title>線上分部 · 小組現況查詢</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --deep: #1D292E;
+    --midnight: #3C5464;
+    --sand: #C8956A;
+    --cream: #EDE0D4;
+    --cream-light: #F6F0EA;
+    --yellow: #FFCC32;
+    --black: #0D1618;
+    --white: #FFFFFF;
+
+    --fg: #1D292E;
+    --fg-2: #3C5464;
+    --fg-3: rgba(29, 41, 46, .52);
+    --line: rgba(29, 41, 46, .10);
+    --line-2: rgba(29, 41, 46, .16);
+
+    --shadow-sm: 0 1px 2px rgba(29,41,46,.06);
+    --shadow: 0 6px 24px -12px rgba(29,41,46,.28);
+    --shadow-lg: 0 18px 48px -20px rgba(29,41,46,.40);
+
+    --font-display: 'Montserrat', 'Noto Sans TC', sans-serif;
+    --font: 'Noto Sans TC', 'Montserrat', -apple-system, sans-serif;
+    --radius: 18px;
+    --radius-sm: 12px;
+    --maxw: 1180px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: var(--font);
+    color: var(--fg);
+    background: var(--cream-light);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(255,204,50,.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 0%, rgba(200,149,106,.10), transparent 55%);
+  }
+  svg { display: block; }
+  .ico { width: 1em; height: 1em; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; flex: none; }
+
+  /* ---------- Header ---------- */
+  header.site {
+    background: var(--deep);
+    color: #fff;
+    position: sticky; top: 0; z-index: 40;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .head-inner {
+    max-width: var(--maxw); margin: 0 auto;
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .brand .mark {
+    width: 40px; height: 40px; flex: none; border-radius: 11px;
+    background: var(--yellow); color: var(--deep);
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 900; font-size: 22px;
+    box-shadow: 0 6px 18px -8px rgba(255,204,50,.7);
+  }
+  .brand .txt { min-width: 0; }
+  .brand .k {
+    font-family: var(--font-display); font-weight: 800; font-size: 16px;
+    letter-spacing: .01em; line-height: 1.15; white-space: nowrap;
+  }
+  .brand .s {
+    font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--yellow); margin-top: 2px; white-space: nowrap;
+  }
+  .head-spacer { flex: 1; }
+  .stat-pills { display: flex; gap: 8px; }
+  .pill {
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.10);
+    border-radius: 999px; padding: 7px 13px; display: flex; align-items: baseline; gap: 6px;
+    font-size: 12px; color: rgba(255,255,255,.72); white-space: nowrap;
+  }
+  .pill b { font-family: var(--font-display); font-weight: 800; font-size: 15px; color: #fff; }
+  .pill.accent b { color: var(--yellow); }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar-wrap { position: sticky; top: 69px; z-index: 30; background: rgba(246,240,234,.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .toolbar { max-width: var(--maxw); margin: 0 auto; padding: 14px 20px; }
+  .search {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border: 1.5px solid var(--line-2); border-radius: 14px;
+    padding: 0 14px; height: 50px; box-shadow: var(--shadow-sm);
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .search:focus-within { border-color: var(--deep); box-shadow: 0 0 0 4px rgba(29,41,46,.07); }
+  .search .ico { font-size: 20px; color: var(--fg-3); }
+  .search input { flex: 1; border: 0; outline: 0; background: transparent; font-family: var(--font); font-size: 16px; color: var(--fg); min-width: 0; }
+  .search input::placeholder { color: var(--fg-3); }
+  .search .clear { border: 0; background: none; color: var(--fg-3); cursor: pointer; font-size: 18px; padding: 4px; display: none; }
+  .search .clear.show { display: block; }
+
+  .filters-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; }
+  .filters-row::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: none; display: inline-flex; align-items: center; gap: 6px;
+    border: 1.5px solid var(--line-2); background: #fff; color: var(--fg-2);
+    border-radius: 999px; padding: 8px 14px; font-size: 13.5px; font-weight: 500;
+    cursor: pointer; white-space: nowrap; transition: all .15s; font-family: var(--font);
+  }
+  .chip .ico { font-size: 15px; }
+  .chip:hover { border-color: var(--midnight); color: var(--fg); }
+  .chip.on { background: var(--deep); border-color: var(--deep); color: #fff; }
+  .chip.gold { border-color: var(--yellow); background: #FFF8E6; color: var(--deep); }
+  .chip.gold:hover { border-color: var(--yellow); }
+  .chip.on.gold { background: var(--yellow); border-color: var(--yellow); color: var(--deep); font-weight: 700; }
+  .chip.more { margin-left: auto; }
+
+  select.chip { -webkit-appearance: none; appearance: none; padding-right: 30px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%233C5464' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; }
+
+  .adv { max-width: var(--maxw); margin: 0 auto; padding: 0 20px; overflow: hidden; max-height: 0; transition: max-height .28s ease; }
+  .adv.open { max-height: 460px; }
+  .adv-inner { padding: 6px 0 16px; display: grid; gap: 14px; }
+  .fgroup .lbl { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--fg-3); margin-bottom: 8px; font-family: var(--font-display); }
+  .fgroup .opts { display: flex; flex-wrap: wrap; gap: 7px; }
+
+  /* ---------- Results ---------- */
+  main { max-width: var(--maxw); margin: 0 auto; padding: 20px; }
+  .results-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .results-head .n { font-size: 14px; color: var(--fg-2); }
+  .results-head .n b { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--deep); }
+  .results-head .upd { font-size: 12px; color: var(--fg-3); }
+
+  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .grid { grid-template-columns: 1fr 1fr 1fr; } }
+
+  .card {
+    background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 18px 16px; box-shadow: var(--shadow-sm);
+    display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden;
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s;
+    animation: rise .4s ease both;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--line-2); }
+  .card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--cream); transition: background .16s; }
+  .card.open-new::before { background: var(--yellow); }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .c-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .c-name { font-family: var(--font-display); font-weight: 800; font-size: 17.5px; line-height: 1.3; color: var(--deep); letter-spacing: -.01em; }
+  .c-leader { display: flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--fg-2); margin-top: 5px; }
+  .c-leader .ico { font-size: 14px; color: var(--fg-3); }
+
+  .c-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+  .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 8px; padding: 4px 9px; font-size: 12px; font-weight: 500; line-height: 1.3; }
+  .badge .ico { font-size: 13px; }
+  .b-open { background: var(--yellow); color: var(--deep); font-weight: 700; }
+  .b-closed { background: rgba(29,41,46,.06); color: var(--fg-3); }
+  .b-mode { background: rgba(60,84,100,.10); color: var(--midnight); }
+  .b-nature { background: rgba(200,149,106,.16); color: #9a6a40; font-weight: 600; }
+
+  .c-meta { display: grid; gap: 8px; padding-top: 12px; border-top: 1px dashed var(--line-2); }
+  .meta { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--fg-2); }
+  .meta .ico { font-size: 16px; color: var(--sand); flex: none; }
+  .meta b { color: var(--fg); font-weight: 500; }
+
+  .c-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 2px; }
+  .members { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fg-2); }
+  .members .ico { font-size: 15px; color: var(--fg-3); }
+  .members b { font-family: var(--font-display); font-weight: 800; font-size: 15px; color: var(--deep); }
+  .tag-type { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-3); font-family: var(--font-display); }
+
+  /* ---------- States ---------- */
+  .state { text-align: center; padding: 70px 24px; color: var(--fg-2); grid-column: 1 / -1; }
+  .state .ico-wrap { width: 64px; height: 64px; border-radius: 18px; background: #fff; border: 1px solid var(--line); display: grid; place-items: center; margin: 0 auto 18px; box-shadow: var(--shadow-sm); }
+  .state .ico-wrap .ico { font-size: 28px; color: var(--sand); }
+  .state h2 { font-family: var(--font-display); font-weight: 800; font-size: 20px; color: var(--deep); margin-bottom: 8px; }
+  .state p { font-size: 14.5px; max-width: 420px; margin: 0 auto; }
+  .skeleton { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; height: 220px; position: relative; overflow: hidden; }
+  .skeleton::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent); transform: translateX(-100%); animation: sweep 1.3s infinite; }
+  @keyframes sweep { 100% { transform: translateX(100%); } }
+
+  /* ---------- Gate ---------- */
+  .gate { min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
+  .gate-card { background: var(--deep); color: #fff; border-radius: 26px; padding: 40px 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; }
+  .gate-card::before { content: ""; position: absolute; top: -40%; right: -30%; width: 70%; height: 80%; background: radial-gradient(circle, rgba(255,204,50,.16), transparent 70%); }
+  .gate-card .mark { width: 56px; height: 56px; border-radius: 16px; background: var(--yellow); color: var(--deep); display: grid; place-items: center; font-family: var(--font-display); font-weight: 900; font-size: 30px; margin: 0 auto 22px; position: relative; }
+  .gate-card h1 { font-family: var(--font-display); font-weight: 800; font-size: 23px; margin-bottom: 6px; }
+  .gate-card .belong { font-size: 11px; letter-spacing: .26em; text-transform: uppercase; color: var(--yellow); margin-bottom: 20px; }
+  .gate-card p { font-size: 14.5px; color: rgba(255,255,255,.74); line-height: 1.7; margin-bottom: 22px; }
+  .gate-form { display: flex; gap: 8px; }
+  .gate-form input { flex: 1; height: 48px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); color: #fff; padding: 0 16px; font-size: 16px; font-family: var(--font); outline: 0; }
+  .gate-form input::placeholder { color: rgba(255,255,255,.42); }
+  .gate-form input:focus { border-color: var(--yellow); }
+  .gate-form button { height: 48px; padding: 0 20px; border: 0; border-radius: 12px; background: var(--yellow); color: var(--deep); font-family: var(--font-display); font-weight: 800; font-size: 15px; cursor: pointer; transition: filter .15s; }
+  .gate-form button:hover { filter: brightness(1.05); }
+  .gate-err { color: #ffb4a8; font-size: 13px; margin-top: 12px; min-height: 18px; }
+
+  footer { max-width: var(--maxw); margin: 0 auto; padding: 28px 20px 40px; text-align: center; color: var(--fg-3); font-size: 12.5px; }
+  footer .belong { font-family: var(--font-display); font-weight: 800; letter-spacing: .2em; color: var(--sand); font-size: 12px; margin-bottom: 6px; }
+
+  @media (max-width: 560px) {
+    .head-inner { padding: 12px 16px; }
+    .stat-pills .pill.hide-sm { display: none; }
+    .brand .k { font-size: 15px; }
+    .toolbar-wrap { top: 65px; }
+    .toolbar { padding: 12px 16px; }
+    main { padding: 16px; }
+    .adv { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Gate (access) -->
+<div id="gate" class="gate" style="display:none">
+  <div class="gate-card">
+    <div class="mark">H</div>
+    <h1>線上分部 · 小組現況</h1>
+    <div class="belong">You Belong Here</div>
+    <p>這是給小組長與服事夥伴的查詢工具。<br/>請使用小組長群組分享的連結進入，或在下方輸入存取碼。</p>
+    <form class="gate-form" id="gateForm">
+      <input type="text" id="gateInput" placeholder="輸入存取碼" autocomplete="off" />
+      <button type="submit">進入</button>
+    </form>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app" style="display:none">
+  <header class="site">
+    <div class="head-inner">
+      <div class="brand">
+        <div class="mark">H</div>
+        <div class="txt">
+          <div class="k">小組現況查詢</div>
+          <div class="s">The Hope · 線上分部</div>
+        </div>
+      </div>
+      <div class="head-spacer"></div>
+      <div class="stat-pills">
+        <div class="pill"><b id="stTotal">–</b>組</div>
+        <div class="pill accent"><b id="stOpen">–</b>開放</div>
+        <div class="pill hide-sm"><b id="stCountry">–</b>地區</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar-wrap">
+    <div class="toolbar">
+      <div class="search">
+        <span class="ico" data-i="search"></span>
+        <input type="text" id="q" placeholder="搜尋小組名稱、組長、地點…" autocomplete="off" />
+        <button class="clear" id="qClear" aria-label="清除">&times;</button>
+      </div>
+      <div class="filters-row">
+        <button class="chip gold" data-quick="open"><span class="ico" data-i="sparkles"></span>只看開放新朋友</button>
+        <select class="chip" id="fCountry"><option value="">所有地區</option></select>
+        <button class="chip" data-quick="online"><span class="ico" data-i="video"></span>線上</button>
+        <button class="chip" data-quick="physical"><span class="ico" data-i="home"></span>實體</button>
+        <button class="chip more" id="moreBtn"><span class="ico" data-i="sliders"></span>更多篩選</button>
+      </div>
+    </div>
+    <div class="adv" id="adv">
+      <div class="adv-inner">
+        <div class="fgroup">
+          <div class="lbl">聚會頻率</div>
+          <div class="opts" id="fFreq"></div>
+        </div>
+        <div class="fgroup">
+          <div class="lbl">聚會星期</div>
+          <div class="opts" id="fDay"></div>
+        </div>
+        <div class="fgroup">
+          <div class="lbl">小組性質</div>
+          <div class="opts" id="fNature"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="results-head">
+      <div class="n"><b id="rCount">0</b> 個小組</div>
+      <div class="upd" id="rUpd"></div>
+    </div>
+    <div id="results" class="grid"></div>
+  </main>
+
+  <footer>
+    <div class="belong">YOU BELONG HERE</div>
+    <div>The Hope 線上分部 · 小組現況查詢 — one church, many cities</div>
+  </footer>
+</div>
+
+<script>
+// ============================================================
+// 設定
+// ============================================================
+var API = "https://script.google.com/macros/s/AKfycbzZHmp0BRlceIvEiPfY6HDJUZ0Qn745Ldb019Uj1IhCa-1WKJm08gxpSNWH3ML0-o4rqw/exec";
+var KEY_STORE = "hopeGroupKey";
+
+var COUNTRY_TW = {
+  "Taiwan":"台灣","Japan":"日本","Malaysia":"馬來西亞","Singapore":"新加坡",
+  "Hong Kong":"香港","Macau":"澳門","China":"中國","United States":"美國",
+  "United Kingdom":"英國","Australia":"澳洲","Spain":"西班牙","Germany":"德國",
+  "Indonesia":"印尼","South Korea":"南韓","Canada":"加拿大","New Zealand":"紐西蘭",
+  "Thailand":"泰國","Vietnam":"越南","France":"法國","Netherlands":"荷蘭"
+};
+function cn(c){ return COUNTRY_TW[c] || c || "其他"; }
+
+var DAY_ORDER = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+
+// ============================================================
+// Lucide 圖示（受信任的靜態常數；以 DOMParser 安全解析）
+// ============================================================
+var ICONS = {
+  search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  sparkles:'<path d="M9.94 14.34A2 2 0 0 0 8.66 13L3.6 11.4a.4.4 0 0 1 0-.76L8.66 9a2 2 0 0 0 1.28-1.34L11.6 2.6a.4.4 0 0 1 .76 0L14 7.66A2 2 0 0 0 15.34 9l5.06 1.6a.4.4 0 0 1 0 .76L15.34 13A2 2 0 0 0 14 14.34l-1.6 5.06a.4.4 0 0 1-.76 0z"/><path d="M19 3v4"/><path d="M21 5h-4"/>',
+  video:'<path d="m16 13 5.2 3.1a.7.7 0 0 0 1-.6V8.5a.7.7 0 0 0-1-.6L16 11"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
+  home:'<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .7-1.5l7-5.8a2 2 0 0 1 2.6 0l7 5.8A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  sliders:'<line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/>',
+  user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  pin:'<path d="M20 10c0 4.4-5.5 9.3-7.3 10.8a1 1 0 0 1-1.4 0C9.5 19.3 4 14.4 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  calendar:'<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+  inbox:'<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  alert:'<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>'
+};
+function ICON(name){
+  var src = '<svg xmlns="http://www.w3.org/2000/svg" class="ico" viewBox="0 0 24 24">' + (ICONS[name] || "") + '</svg>';
+  var doc = new DOMParser().parseFromString(src, "image/svg+xml");
+  return document.importNode(doc.documentElement, true);
+}
+function hydrateIcons(root){
+  (root || document).querySelectorAll('.ico[data-i]').forEach(function(el){
+    el.parentNode.replaceChild(ICON(el.getAttribute("data-i")), el);
+  });
+}
+
+// 小工具：建立元素
+function E(tag, cls, txt){
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (txt != null) e.textContent = txt;
+  return e;
+}
+function clear(node){ while (node.firstChild) node.removeChild(node.firstChild); }
+
+// ============================================================
+// 狀態
+// ============================================================
+var DATA = [];
+var FILTERS = { q:"", country:"", open:false, online:false, physical:false, freq:"", days:[], nature:"" };
+var key = "";
+
+// ============================================================
+// 取資料：fetch 優先，失敗用 JSONP（相容 in-app 瀏覽器）
+// ============================================================
+function loadGroups(){ return fetchJson().catch(function(){ return jsonp(); }); }
+function fetchJson(){
+  var url = API + "?action=groups&key=" + encodeURIComponent(key);
+  return fetch(url, { method:"GET" }).then(function(r){ return r.json(); });
+}
+function jsonp(){
+  return new Promise(function(resolve, reject){
+    var cbName = "__hopecb_" + Date.now();
+    var s = document.createElement("script");
+    var to = setTimeout(function(){ cleanup(); reject(new Error("timeout")); }, 12000);
+    function cleanup(){ clearTimeout(to); try { delete window[cbName]; } catch(e){} if (s.parentNode) s.parentNode.removeChild(s); }
+    window[cbName] = function(data){ cleanup(); resolve(data); };
+    s.onerror = function(){ cleanup(); reject(new Error("jsonp error")); };
+    s.src = API + "?action=groups&key=" + encodeURIComponent(key) + "&callback=" + cbName;
+    document.body.appendChild(s);
+  });
+}
+
+// ============================================================
+// 啟動
+// ============================================================
+(function init(){
+  hydrateIcons(document);
+  var p = new URLSearchParams(location.search);
+  var urlKey = p.get("k");
+  if (urlKey){
+    key = urlKey.trim();
+    try { localStorage.setItem(KEY_STORE, key); } catch(e){}
+    history.replaceState(null, "", location.pathname); // 從網址移除金鑰
+  } else {
+    try { key = localStorage.getItem(KEY_STORE) || ""; } catch(e){ key = ""; }
+  }
+  bindGate();
+  if (!key){ showGate(); return; }
+  boot();
+})();
+
+function bindGate(){
+  document.getElementById("gateForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var v = document.getElementById("gateInput").value.trim();
+    if (!v) return;
+    key = v;
+    try { localStorage.setItem(KEY_STORE, key); } catch(e){}
+    document.getElementById("gateErr").textContent = "";
+    boot();
+  });
+}
+function showGate(err){
+  document.getElementById("app").style.display = "none";
+  document.getElementById("gate").style.display = "grid";
+  document.getElementById("gateErr").textContent = err || "";
+  if (err) document.getElementById("gateInput").focus();
+}
+
+function boot(){
+  document.getElementById("gate").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  renderSkeleton();
+  bindControls();
+  loadGroups().then(function(res){
+    if (!res || res.ok === false){
+      var unauth = res && res.error === "unauthorized";
+      try { localStorage.removeItem(KEY_STORE); } catch(e){}
+      key = "";
+      showGate(unauth ? "存取碼無效，請向管理者索取最新連結。" : "載入失敗，請稍後再試。");
+      return;
+    }
+    DATA = (res.groups || []).map(normalize);
+    buildFilterOptions();
+    setStats(res.updatedAt);
+    render();
+  }).catch(function(){
+    var box = document.getElementById("results");
+    clear(box); box.className = "grid";
+    box.appendChild(stateEl("alert","連線發生問題","請檢查網路後重新整理頁面，或向管理者確認連結是否仍有效。"));
+  });
+}
+
+function normalize(g){
+  g.modes = String(g.mode||"").split(/[;,；、]/).map(function(s){return s.trim();}).filter(Boolean);
+  g.dayList = String(g.day||"").split(/[;,；、]/).map(function(s){return s.trim();}).filter(Boolean);
+  g.isOnline = g.modes.some(function(m){ return m.indexOf("線上")>-1; });
+  g.isPhysical = g.modes.some(function(m){ return m.indexOf("實體")>-1; });
+  return g;
+}
+
+// ============================================================
+// 篩選器選項
+// ============================================================
+function buildFilterOptions(){
+  var byCountry = {};
+  DATA.forEach(function(g){ byCountry[g.country] = (byCountry[g.country]||0)+1; });
+  var countries = Object.keys(byCountry).sort(function(a,b){
+    if (a==="Taiwan") return -1; if (b==="Taiwan") return 1;
+    return byCountry[b]-byCountry[a];
+  });
+  var sel = document.getElementById("fCountry");
+  countries.forEach(function(c){
+    sel.appendChild(E("option", null, cn(c) + "（" + byCountry[c] + "）")).value = c;
+  });
+
+  fillOpts("fFreq", uniq(DATA.map(function(g){return g.frequency;})), "freq");
+
+  var days = uniq([].concat.apply([], DATA.map(function(g){return g.dayList;})));
+  days.sort(function(a,b){ return DAY_ORDER.indexOf(a)-DAY_ORDER.indexOf(b); });
+  fillOpts("fDay", days, "day");
+
+  fillOpts("fNature", uniq(DATA.map(function(g){return g.nature;})), "nature");
+}
+function uniq(arr){ return arr.filter(function(v,i){ return v && arr.indexOf(v)===i; }); }
+
+function fillOpts(containerId, values, type){
+  var box = document.getElementById(containerId);
+  clear(box);
+  values.forEach(function(v){
+    var b = E("button", "chip", v);
+    b.dataset.type = type; b.dataset.val = v;
+    b.addEventListener("click", function(){ toggleOpt(type, v, b); });
+    box.appendChild(b);
+  });
+}
+function toggleOpt(type, val, el){
+  if (type==="day"){
+    var i = FILTERS.days.indexOf(val);
+    if (i>-1){ FILTERS.days.splice(i,1); el.classList.remove("on"); }
+    else { FILTERS.days.push(val); el.classList.add("on"); }
+  } else {
+    var on = FILTERS[type] === val;
+    document.querySelectorAll('[data-type="'+type+'"]').forEach(function(x){ x.classList.remove("on"); });
+    FILTERS[type] = on ? "" : val;
+    if (!on) el.classList.add("on");
+  }
+  render();
+}
+
+// ============================================================
+// 控制項
+// ============================================================
+function bindControls(){
+  var q = document.getElementById("q");
+  var clr = document.getElementById("qClear");
+  q.addEventListener("input", function(){
+    FILTERS.q = q.value.trim().toLowerCase();
+    clr.classList.toggle("show", !!q.value);
+    render();
+  });
+  clr.addEventListener("click", function(){ q.value=""; FILTERS.q=""; clr.classList.remove("show"); render(); q.focus(); });
+
+  document.getElementById("fCountry").addEventListener("change", function(e){ FILTERS.country = e.target.value; render(); });
+
+  document.querySelectorAll("[data-quick]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var k = btn.dataset.quick;
+      FILTERS[k] = !FILTERS[k];
+      btn.classList.toggle("on", FILTERS[k]);
+      render();
+    });
+  });
+
+  var more = document.getElementById("moreBtn");
+  more.addEventListener("click", function(){
+    var open = document.getElementById("adv").classList.toggle("open");
+    more.classList.toggle("on", open);
+  });
+}
+
+// ============================================================
+// 篩選 + 渲染
+// ============================================================
+function applyFilters(){
+  return DATA.filter(function(g){
+    if (FILTERS.country && g.country !== FILTERS.country) return false;
+    if (FILTERS.open && !g.openToNew) return false;
+    if (FILTERS.online && !g.isOnline) return false;
+    if (FILTERS.physical && !g.isPhysical) return false;
+    if (FILTERS.freq && g.frequency !== FILTERS.freq) return false;
+    if (FILTERS.nature && g.nature !== FILTERS.nature) return false;
+    if (FILTERS.days.length && !FILTERS.days.some(function(d){ return g.dayList.indexOf(d)>-1; })) return false;
+    if (FILTERS.q){
+      var hay = [g.name,g.leader,g.country,cn(g.country),g.city,g.district].join(" ").toLowerCase();
+      if (hay.indexOf(FILTERS.q) === -1) return false;
+    }
+    return true;
+  }).sort(function(a,b){
+    if (a.country==="Taiwan" && b.country!=="Taiwan") return -1;
+    if (b.country==="Taiwan" && a.country!=="Taiwan") return 1;
+    if (a.country !== b.country) return cn(a.country).localeCompare(cn(b.country),"zh-Hant");
+    return a.name.localeCompare(b.name,"zh-Hant");
+  });
+}
+
+function render(){
+  var list = applyFilters();
+  document.getElementById("rCount").textContent = list.length;
+  var box = document.getElementById("results");
+  clear(box);
+  if (!list.length){
+    box.className = "grid";
+    box.appendChild(stateEl("inbox","找不到符合的小組","試著調整搜尋字詞或清除部分篩選條件。"));
+    return;
+  }
+  box.className = "grid";
+  list.forEach(function(g, i){
+    var c = buildCard(g);
+    c.style.animationDelay = Math.min(i*22,300) + "ms";
+    box.appendChild(c);
+  });
+}
+
+function locationText(g){
+  var parts = [cn(g.country)];
+  if (g.city) parts.push(g.city);
+  if (g.country === "Taiwan" && g.district) parts.push(g.district); // 區 level 只台灣
+  return parts.join(" · ");
+}
+
+function badge(cls, iconName, text){
+  var b = E("span", "badge " + cls);
+  if (iconName) b.appendChild(ICON(iconName));
+  b.appendChild(document.createTextNode(text));
+  return b;
+}
+function metaRow(iconName, text, strong){
+  var m = E("div", "meta");
+  m.appendChild(ICON(iconName));
+  m.appendChild(strong ? E("b", null, text) : E("span", null, text));
+  return m;
+}
+
+function buildCard(g){
+  var card = E("article", "card" + (g.openToNew ? " open-new" : ""));
+
+  var top = E("div", "c-top");
+  var topL = E("div");
+  topL.appendChild(E("div", "c-name", g.name));
+  var leader = E("div", "c-leader");
+  leader.appendChild(ICON("user"));
+  leader.appendChild(document.createTextNode(g.leader || "—"));
+  topL.appendChild(leader);
+  top.appendChild(topL);
+  card.appendChild(top);
+
+  var badges = E("div", "c-badges");
+  badges.appendChild(g.openToNew
+    ? badge("b-open", "sparkles", "開放新朋友")
+    : badge("b-closed", null, "暫不開放"));
+  g.modes.forEach(function(m){
+    badges.appendChild(badge("b-mode", m.indexOf("線上")>-1 ? "video" : "home", m));
+  });
+  if (g.nature && g.nature !== "皆可") badges.appendChild(badge("b-nature", null, g.nature));
+  card.appendChild(badges);
+
+  var meta = E("div", "c-meta");
+  meta.appendChild(metaRow("pin", locationText(g), false));
+  var when = [];
+  if (g.day) when.push(g.day);
+  if (g.frequency) when.push(g.frequency);
+  if (when.length) meta.appendChild(metaRow("calendar", when.join(" · "), true));
+  if (g.time) meta.appendChild(metaRow("clock", g.time, true));
+  card.appendChild(meta);
+
+  var foot = E("div", "c-foot");
+  var mem = E("span", "members");
+  mem.appendChild(ICON("users"));
+  mem.appendChild(E("b", null, String(g.size || 0)));
+  mem.appendChild(document.createTextNode(" 人"));
+  foot.appendChild(mem);
+  foot.appendChild(E("span", "tag-type", g.leaderType || ""));
+  card.appendChild(foot);
+
+  return card;
+}
+
+function stateEl(icon, title, desc){
+  var s = E("div", "state");
+  var iw = E("div", "ico-wrap"); iw.appendChild(ICON(icon)); s.appendChild(iw);
+  s.appendChild(E("h2", null, title));
+  s.appendChild(E("p", null, desc));
+  return s;
+}
+function renderSkeleton(){
+  var box = document.getElementById("results");
+  clear(box); box.className = "grid";
+  for (var i=0;i<6;i++) box.appendChild(E("div", "skeleton"));
+}
+
+function setStats(updatedAt){
+  document.getElementById("stTotal").textContent = DATA.length;
+  document.getElementById("stOpen").textContent = DATA.filter(function(g){return g.openToNew;}).length;
+  document.getElementById("stCountry").textContent = uniq(DATA.map(function(g){return g.country;})).length;
+  if (updatedAt){
+    var d = new Date(updatedAt);
+    document.getElementById("rUpd").textContent = "資料更新於 " + d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate();
+  }
+}
+</script>
+</body>
+</html>
