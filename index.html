@@ -41,6 +41,22 @@
   .role-tag { display: none; align-items: center; gap: 6px; background: rgba(255,204,50,.14); border: 1px solid rgba(255,204,50,.3); color: var(--yellow); border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
   .role-tag.show { display: inline-flex; }
   .role-tag .ico { font-size: 14px; }
+  .admin-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); color: rgba(255,255,255,.85); border-radius: 999px; padding: 7px 13px; font-size: 12.5px; font-weight: 600; font-family: var(--font); cursor: pointer; white-space: nowrap; transition: background .15s; }
+  .admin-btn:hover { background: rgba(255,255,255,.16); }
+  .admin-btn .ico { font-size: 14px; }
+  .admin-btn.hide { display: none; }
+
+  .modal { position: fixed; inset: 0; z-index: 200; background: rgba(13,22,24,.55); backdrop-filter: blur(3px); display: grid; place-items: center; padding: 24px; }
+  .modal-card { background: var(--deep); color: #fff; border-radius: 22px; padding: 34px 30px 30px; max-width: 380px; width: 100%; text-align: center; box-shadow: var(--shadow-lg); position: relative; }
+  .modal-x { position: absolute; top: 14px; right: 16px; background: none; border: 0; color: rgba(255,255,255,.5); font-size: 24px; cursor: pointer; line-height: 1; }
+  .mk-mark { width: 48px; height: 48px; border-radius: 14px; background: var(--yellow); color: var(--deep); display: grid; place-items: center; font-family: var(--font-display); font-weight: 900; font-size: 26px; margin: 0 auto 16px; }
+  .modal-card h2 { font-family: var(--font-display); font-weight: 800; font-size: 19px; margin-bottom: 6px; }
+  .modal-card p { font-size: 13.5px; color: rgba(255,255,255,.7); margin-bottom: 18px; }
+  .modal-form { display: flex; gap: 8px; }
+  .modal-form input { flex: 1; height: 46px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); color: #fff; padding: 0 15px; font-size: 16px; font-family: var(--font); outline: 0; }
+  .modal-form input:focus { border-color: var(--yellow); }
+  .modal-form button { height: 46px; padding: 0 18px; border: 0; border-radius: 12px; background: var(--yellow); color: var(--deep); font-family: var(--font-display); font-weight: 800; font-size: 14px; cursor: pointer; }
+  .modal-err { color: #ffb4a8; font-size: 13px; margin-top: 12px; min-height: 18px; }
 
   /* Dashboard */
   .dash { max-width: var(--maxw); margin: 0 auto; padding: 24px 20px 4px; }
@@ -65,8 +81,7 @@
   .country.has-groups:hover, .country.hot { fill: var(--midnight); }
   .dot-ring { fill: rgba(29,41,46,.10); pointer-events: none; }
   .dot-hit { fill: transparent; cursor: pointer; }
-  .dot { fill: var(--deep); pointer-events: none; }
-  .dot.tw { fill: var(--yellow); stroke: var(--deep); stroke-width: 1.2; }
+  .dot { fill: var(--deep); stroke: #fff; stroke-width: 1.5; pointer-events: none; }
   .dot-num { fill: #fff; font-family: var(--font-display); font-weight: 800; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
   .dot-num.tw { fill: var(--deep); }
   .maptip { position: fixed; z-index: 100; pointer-events: none; background: var(--deep); color: #fff; border-radius: 10px; padding: 9px 12px; font-size: 13px; line-height: 1.45; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .12s; max-width: 230px; }
@@ -219,6 +234,7 @@
         </div>
       </div>
       <div class="head-spacer"></div>
+      <button class="admin-btn" id="adminBtn"><span class="ico" data-i="lock"></span>管理者</button>
       <div class="role-tag" id="roleTag"><span class="ico" data-i="shield"></span>管理者檢視</div>
     </div>
   </header>
@@ -283,6 +299,21 @@
 
 <div class="maptip" id="maptip"></div>
 
+<!-- 管理者密碼解鎖 -->
+<div id="adminModal" class="modal" style="display:none">
+  <div class="modal-card">
+    <button class="modal-x" id="adminClose" aria-label="關閉">&times;</button>
+    <div class="mk-mark">H</div>
+    <h2>管理者檢視</h2>
+    <p>輸入管理者密碼以查看人數統計。</p>
+    <form class="modal-form" id="adminForm">
+      <input type="password" id="adminPwInput" placeholder="管理者密碼" autocomplete="off" />
+      <button type="submit" id="adminSubmit">切換</button>
+    </form>
+    <div class="modal-err" id="adminErr"></div>
+  </div>
+</div>
+
 <script>
 var API = "https://script.google.com/macros/s/AKfycbzZHmp0BRlceIvEiPfY6HDJUZ0Qn745Ldb019Uj1IhCa-1WKJm08gxpSNWH3ML0-o4rqw/exec";
 var KEY_STORE = "hopeGroupKey";
@@ -298,8 +329,8 @@ function cn(c){ return COUNTRY_TW[c] || c || "其他"; }
 
 // 國家經緯度（畫地圖圓點用）
 var COUNTRY_LL = {
-  "Taiwan":[121,23.7],"Japan":[138,36.5],"Malaysia":[101.7,3.2],"Singapore":[103.8,1.35],
-  "Hong Kong":[114.2,22.3],"Macau":[113.5,22.2],"China":[103,35],"United States":[-98,39],
+  "Taiwan":[121,23.7],"Japan":[138,36.5],"Malaysia":[101.7,3.2],"Singapore":[104,-2.5],
+  "Hong Kong":[116.5,19.5],"Macau":[110,16],"China":[103,35],"United States":[-98,39],
   "United Kingdom":[-2,53],"Australia":[134,-25],"Spain":[-3.7,40],"Germany":[10.4,51],
   "Indonesia":[113,-1],"South Korea":[127.8,36.5],"Canada":[-106,56],"New Zealand":[172,-41],
   "Thailand":[100.9,15],"Vietnam":[106,16],"France":[2.4,46.5],"Netherlands":[5.3,52.2]
@@ -323,7 +354,8 @@ var ICONS = {
   alert:'<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
   globe:'<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
   shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
-  award:'<path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/>'
+  award:'<path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/>',
+  lock:'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'
 };
 var SVGNS="http://www.w3.org/2000/svg";
 function ICON(name){
@@ -336,9 +368,10 @@ function E(tag,cls,txt){ var e=document.createElement(tag); if(cls)e.className=c
 function svgEl(tag,attrs){ var e=document.createElementNS(SVGNS,tag); if(attrs)for(var k in attrs)e.setAttribute(k,attrs[k]); return e; }
 function clear(node){ while(node.firstChild)node.removeChild(node.firstChild); }
 
-var DATA=[], ROLE="member";
+var DATA=[], ROLE="member", UPDATED=null;
 var FILTERS={ q:"", country:"", open:false, online:false, physical:false, freq:"", days:[], nature:"" };
 var key="";
+var ADMIN_FLAG="hopeAdminOn";   // sessionStorage：管理者解鎖僅當次瀏覽有效
 
 // 取資料：fetch 優先，失敗用 JSONP
 function loadGroups(){ return fetchJson().catch(function(){ return jsonp(); }); }
@@ -380,10 +413,42 @@ function showGate(err){
   if(err)document.getElementById("gateInput").focus();
 }
 
+function updateRoleUI(){
+  document.getElementById("roleTag").classList.toggle("show", ROLE==="admin");
+  document.getElementById("adminBtn").classList.toggle("hide", ROLE==="admin");
+}
+
+var adminBound=false;
+function bindAdmin(){
+  if(adminBound) return; adminBound=true;
+  var modal=document.getElementById("adminModal");
+  var open=function(){ modal.style.display="grid"; document.getElementById("adminErr").textContent=""; document.getElementById("adminPwInput").value=""; setTimeout(function(){document.getElementById("adminPwInput").focus();},50); };
+  var close=function(){ modal.style.display="none"; };
+  document.getElementById("adminBtn").addEventListener("click",open);
+  document.getElementById("adminClose").addEventListener("click",close);
+  modal.addEventListener("click",function(e){ if(e.target===modal)close(); });
+  document.getElementById("adminForm").addEventListener("submit",function(e){
+    e.preventDefault();
+    var pw=document.getElementById("adminPwInput").value.trim(); if(!pw)return;
+    var btn=document.getElementById("adminSubmit"); btn.disabled=true; btn.textContent="驗證中…";
+    document.getElementById("adminErr").textContent="";
+    // 向後端驗證密碼（送出該密碼當金鑰，role 回 admin 才算正確）
+    fetch(API+"?action=groups&key="+encodeURIComponent(pw),{method:"GET"}).then(function(r){return r.json();}).then(function(res){
+      btn.disabled=false; btn.textContent="切換";
+      if(res&&res.role==="admin"){
+        ROLE="admin"; try{sessionStorage.setItem(ADMIN_FLAG,"1");}catch(e){}
+        close(); updateRoleUI(); renderDashboard(UPDATED); render();
+      } else {
+        document.getElementById("adminErr").textContent="密碼錯誤，請再試一次。";
+      }
+    }).catch(function(){ btn.disabled=false; btn.textContent="切換"; document.getElementById("adminErr").textContent="連線失敗，請稍後再試。"; });
+  });
+}
+
 function boot(){
   document.getElementById("gate").style.display="none";
   document.getElementById("app").style.display="block";
-  renderSkeleton(); bindControls();
+  renderSkeleton(); bindControls(); bindAdmin();
   loadGroups().then(function(res){
     if(!res||res.ok===false){
       var unauth=res&&res.error==="unauthorized";
@@ -393,10 +458,13 @@ function boot(){
     }
     ROLE=res.role||"member";
     DATA=(res.groups||[]).map(normalize);
-    document.getElementById("roleTag").classList.toggle("show", ROLE==="admin");
+    UPDATED=res.updatedAt;
+    // 同次瀏覽已用密碼解鎖過 → 維持管理者檢視（資料含單組人數，累計可在前端計算）
+    try{ if(ROLE!=="admin" && sessionStorage.getItem(ADMIN_FLAG)==="1") ROLE="admin"; }catch(e){}
+    updateRoleUI();
     buildFilterOptions();
-    renderDashboard(res.updatedAt);
-    setUpd(res.updatedAt);
+    renderDashboard(UPDATED);
+    setUpd(UPDATED);
     render();
   }).catch(function(){
     var box=document.getElementById("results"); clear(box); box.className="grid";
@@ -497,15 +565,16 @@ function buildMap(){
     svg.appendChild(p);
   });
 
-  // 2) 圓點（所有有小組的國家，含無國界的 香港/澳門/新加坡）
-  Object.keys(byCountry).sort(function(a,b){return byCountry[a]-byCountry[b];}).forEach(function(c){
+  // 2) 圓點：由大到小繪製，讓小圓點疊在大圓點之上（避免台灣蓋住香港/澳門）
+  function dotR(n){ return Math.min(5+Math.sqrt(n)*2.3, 14); }
+  Object.keys(byCountry).sort(function(a,b){return byCountry[b]-byCountry[a];}).forEach(function(c){
     var ll=COUNTRY_LL[c]; if(!ll)return;
-    var n=byCountry[c], xy=proj(ll[0],ll[1]), r=5+Math.sqrt(n)*3.2, isTw=(c==="Taiwan");
-    svg.appendChild(svgEl("circle",{class:"dot-ring",cx:xy[0],cy:xy[1],r:r+5}));
-    svg.appendChild(svgEl("circle",{class:"dot"+(isTw?" tw":""),cx:xy[0],cy:xy[1],r:r}));
-    var t=svgEl("text",{class:"dot-num"+(isTw?" tw":""),x:xy[0],y:xy[1],"font-size":Math.max(9,Math.min(r,15))});
+    var n=byCountry[c], xy=proj(ll[0],ll[1]), r=dotR(n);
+    svg.appendChild(svgEl("circle",{class:"dot-ring",cx:xy[0],cy:xy[1],r:r+4}));
+    svg.appendChild(svgEl("circle",{class:"dot",cx:xy[0],cy:xy[1],r:r}));
+    var t=svgEl("text",{class:"dot-num",x:xy[0],y:xy[1],"font-size":Math.max(9,Math.min(r,13))});
     t.textContent=n; svg.appendChild(t);
-    var hit=svgEl("circle",{class:"dot-hit",cx:xy[0],cy:xy[1],r:r+6}); bindMapInteract(hit,c,n); svg.appendChild(hit);
+    var hit=svgEl("circle",{class:"dot-hit",cx:xy[0],cy:xy[1],r:r+5}); bindMapInteract(hit,c,n); svg.appendChild(hit);
   });
   wrap.appendChild(svg);
 }
